@@ -7,12 +7,12 @@ A small, full-stack task manager: an **ASP.NET Core** Web API + a **Vue 3** SPA,
 ## Implementation status
 
 **Phase 1 — Skeleton** (in progress)
-- [ ] Solution + ASP.NET Core Web API project (`net10.0`)
+- [x] Solution + ASP.NET Core Web API project (`net10.0`)
 - [ ] xUnit integration-test project
 - [ ] Vue 3 + TypeScript frontend
 - [ ] Dev CORS + configurable API base URL
 - [ ] End-to-end smoke test (frontend ↔ backend)
-- [ ] `.gitignore` / repo hygiene
+- [x] `.gitignore` / repo hygiene
 
 **Later phases** — persistence (Task entity + EF Core + migrations) → backend CRUD + validation → frontend CRUD flows → minimal JWT auth + ownership → focused tests → final verification.
 
@@ -42,7 +42,7 @@ The app lets a user register, log in, and manage a personal to-do list. A task h
 
 ### Backend
 ```bash
-cd backend/TodoApi
+cd backend/ToDoApi
 dotnet restore
 dotnet run
 ```
@@ -59,6 +59,7 @@ Set the API base URL via `VITE_API_BASE_URL` (see `.env.example`).
 
 ### Tests
 ```bash
+cd backend
 dotnet test
 ```
 
@@ -66,15 +67,15 @@ dotnet test
 
 Once the API is running, you can exercise it two ways — nothing extra to install:
 - **Scalar** — open `/scalar` in the browser for interactive API docs: browse every endpoint, try requests, and paste a bearer token to call the authenticated ones.
-- **`TodoApi.http`** — run the requests straight from VS 2026 or VS Code (REST Client extension); it can reuse the token from the `login` response on later requests.
+- **`ToDoApi.http`** — run the requests straight from VS 2026 or VS Code (REST Client extension); it can reuse the token from the `login` response on later requests.
 
 ## Project structure
 ```
 ToDo/
-├─ ToDo.sln
 ├─ backend/
-│  ├─ TodoApi/         ASP.NET Core Web API (one project)
-│  └─ TodoApi.Tests/   xUnit integration tests
+│  ├─ ToDo.slnx
+│  ├─ ToDoApi/         ASP.NET Core Web API (one project)
+│  └─ ToDoApi.Tests/   xUnit integration tests
 ├─ frontend/           Vue 3 + TS + Vite SPA
 └─ README.md
 ```
