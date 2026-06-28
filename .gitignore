@@ -1,0 +1,32 @@
+# ---------- .NET build output ----------
+bin/
+obj/
+
+# ---------- IDE / editor ----------
+.vs/
+.idea/
+*.user
+*.suo
+
+# ---------- SQLite (local dev database) ----------
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# ---------- Node / Vue frontend ----------
+node_modules/
+dist/
+.vite/
+*.local
+
+# ---------- Environment / secrets ----------
+.env
+.env.*
+!.env.example
+appsettings.*.local.json
+
+# ---------- OS ----------
+.DS_Store
+Thumbs.db
