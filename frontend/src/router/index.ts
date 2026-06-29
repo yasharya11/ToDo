@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '@/views/HomeView.vue'
+import TaskListView from '@/views/TaskListView.vue'
 import { useAuthStore } from '@/stores/auth'
 
 // Strongly-typed route meta so the guard and App shell read these flags safely.
@@ -17,8 +17,8 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'home',
-      component: HomeView,
+      name: 'tasks',
+      component: TaskListView,
       meta: { requiresAuth: true },
     },
     {
@@ -46,7 +46,7 @@ router.beforeEach((to) => {
   }
 
   if (to.meta.public && auth.isAuthenticated) {
-    return { name: 'home' }
+    return { name: 'tasks' }
   }
 })
 
