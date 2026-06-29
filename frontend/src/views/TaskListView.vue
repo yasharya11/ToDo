@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useTasksStore, type Task } from '@/stores/tasks'
 import TaskItem from '@/components/TaskItem.vue'
+import TaskFormModal from '@/components/TaskFormModal.vue'
+import DeleteDialog from '@/components/DeleteDialog.vue'
 
 const store = useTasksStore()
 
@@ -32,14 +34,72 @@ const countLabel = computed(() => {
   return store.overdueCount > 0 ? `${base} · ${store.overdueCount} overdue` : base
 })
 
-// Create/edit/delete/complete are wired to the forms + store in #23. Stubbed here so the read-only
-// list view stands on its own (the empty-state CTA still needs a button to render).
-function onCreate(): void {
-  // #23: open the create-task form.
+// --- Create / edit form ---
+const formOpen = ref(false)
+const editingTask = ref<Task | null>(null)
+
+function openCreate(): void {
+  editingTask.value = null
+  formOpen.value = true
+}
+function openEdit(task: Task): void {
+  editingTask.value = task
+  formOpen.value = true
+}
+function closeForm(): void {
+  formOpen.value = false
+  editingTask.value = null
+}
+
+// --- Delete confirmation ---
+const deletingTask = ref<Task | null>(null)
+const deleteSubmitting = ref(false)
+const deleteError = ref<string | null>(null)
+
+function openDelete(task: Task): void {
+  deletingTask.value = task
+  deleteError.value = null
+}
+function closeDelete(): void {
+  deletingTask.value = null
+  deleteError.value = null
+}
+async function confirmDelete(): Promise<void> {
+  if (!deletingTask.value) return
+  deleteSubmitting.value = true
+  deleteError.value = null
+  try {
+    await store.deleteTask(deletingTask.value.id)
+    closeDelete()
+  } catch {
+    deleteError.value = "Couldn't delete the task. Please try again."
+  } finally {
+    deleteSubmitting.value = false
+  }
+}
+
+// --- Inline completion toggle (no modal): surface failures in a transient toast ---
+const actionError = ref<string | null>(null)
+let actionErrorTimer: ReturnType<typeof setTimeout> | undefined
+
+function flashError(message: string): void {
+  actionError.value = message
+  if (actionErrorTimer) clearTimeout(actionErrorTimer)
+  actionErrorTimer = setTimeout(() => (actionError.value = null), 4000)
+}
+async function onToggle(task: Task): Promise<void> {
+  try {
+    await store.toggleComplete(task)
+  } catch {
+    flashError("Couldn't update the task. Please try again.")
+  }
 }
 
 onMounted(() => {
   void store.fetchTasks()
+})
+onBeforeUnmount(() => {
+  if (actionErrorTimer) clearTimeout(actionErrorTimer)
 })
 </script>
 
@@ -77,7 +137,7 @@ onMounted(() => {
       <div class="state-icon state-icon--brand" aria-hidden="true">+</div>
       <h2 class="state__title">No tasks yet</h2>
       <p class="state__text">Create your first task to start tracking what needs to get done.</p>
-      <button type="button" class="btn-primary" @click="onCreate">Create your first task</button>
+      <button type="button" class="btn-primary" @click="openCreate">Create your first task</button>
     </div>
 
     <!-- Ready: the list. -->
@@ -87,7 +147,7 @@ onMounted(() => {
           <h1 class="tasks__title">My tasks</h1>
           <p class="tasks__count">{{ countLabel }}</p>
         </div>
-        <button type="button" class="btn-primary tasks__create" @click="onCreate">
+        <button type="button" class="btn-primary tasks__create" @click="openCreate">
           <span class="tasks__plus" aria-hidden="true">+</span> Create task
         </button>
       </header>
@@ -108,9 +168,30 @@ onMounted(() => {
       </div>
 
       <div v-if="visibleTasks.length > 0" class="tasks__list">
-        <TaskItem v-for="task in visibleTasks" :key="task.id" :task="task" />
+        <TaskItem
+          v-for="task in visibleTasks"
+          :key="task.id"
+          :task="task"
+          @toggle="onToggle(task)"
+          @edit="openEdit(task)"
+          @delete="openDelete(task)"
+        />
       </div>
       <p v-else class="tasks__empty-filter">No {{ filter }} tasks.</p>
+    </div>
+
+    <TaskFormModal v-if="formOpen" :task="editingTask" @close="closeForm" @saved="closeForm" />
+    <DeleteDialog
+      v-if="deletingTask"
+      :title="deletingTask.title"
+      :deleting="deleteSubmitting"
+      :error="deleteError"
+      @confirm="confirmDelete"
+      @close="closeDelete"
+    />
+
+    <div v-if="actionError" class="toast" role="alert" @click="actionError = null">
+      {{ actionError }}
     </div>
   </section>
 </template>
@@ -344,6 +425,24 @@ onMounted(() => {
 
 .btn-secondary:hover {
   background: var(--c-surface-2);
+}
+
+/* Transient error toast for inline actions (e.g. a failed completion toggle). */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: var(--sp-5);
+  transform: translateX(-50%);
+  z-index: 200;
+  max-width: calc(100vw - 2 * var(--sp-4));
+  padding: 11px 16px;
+  background: var(--c-overdue);
+  border-radius: var(--r-sm);
+  box-shadow: var(--shadow-md);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
 }
 
 /* Mobile: full-width create button below the title. */

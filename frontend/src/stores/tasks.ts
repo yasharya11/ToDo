@@ -14,11 +14,19 @@ export interface Task {
   updatedAtUtc: string
 }
 
+/** The fields a create/edit form submits (matches CreateTaskRequest; update adds isCompleted). */
+export interface TaskInput {
+  title: string
+  description: string | null
+  dueDate: string
+}
+
 export type LoadStatus = 'idle' | 'loading' | 'ready' | 'error'
 
 /**
- * The signed-in user's tasks. #22 owns the read path (load + hold the list reactively so the view
- * and its filters update without a refresh); the create/edit/delete/complete mutations land in #23.
+ * The signed-in user's tasks: the read path (load + hold the list reactively) plus the CRUD
+ * mutations. Each mutation updates the local list from the API's response so the view reflects the
+ * change immediately — no refetch — and rethrows on failure so the caller can show a visible error.
  */
 export const useTasksStore = defineStore('tasks', () => {
   const tasks = ref<Task[]>([])
@@ -45,5 +53,49 @@ export const useTasksStore = defineStore('tasks', () => {
     }
   }
 
-  return { tasks, status, overdueCount, fetchTasks }
+  async function createTask(input: TaskInput): Promise<void> {
+    const created = await request<Task>('/api/tasks', { method: 'POST', body: input, auth: true })
+    tasks.value.push(created)
+  }
+
+  async function updateTask(
+    id: number,
+    input: TaskInput & { isCompleted: boolean },
+  ): Promise<void> {
+    const updated = await request<Task>(`/api/tasks/${id}`, {
+      method: 'PUT',
+      body: input,
+      auth: true,
+    })
+    const index = tasks.value.findIndex((task) => task.id === id)
+    if (index !== -1) {
+      tasks.value[index] = updated
+    }
+  }
+
+  async function deleteTask(id: number): Promise<void> {
+    await request<void>(`/api/tasks/${id}`, { method: 'DELETE', auth: true })
+    tasks.value = tasks.value.filter((task) => task.id !== id)
+  }
+
+  /** Flips completion via a full PUT (the API's update endpoint also toggles complete/reopen). */
+  async function toggleComplete(task: Task): Promise<void> {
+    await updateTask(task.id, {
+      title: task.title,
+      description: task.description,
+      dueDate: task.dueDate,
+      isCompleted: !task.isCompleted,
+    })
+  }
+
+  return {
+    tasks,
+    status,
+    overdueCount,
+    fetchTasks,
+    createTask,
+    updateTask,
+    deleteTask,
+    toggleComplete,
+  }
 })
