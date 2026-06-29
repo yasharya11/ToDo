@@ -1,8 +1,8 @@
 import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
-import App from '../App.vue'
+import HomeView from '../HomeView.vue'
 
-describe('App health check', () => {
+describe('HomeView', () => {
   it('shows the loading state while the health request is in flight', () => {
     // Keep fetch pending so the component stays in its initial loading state.
     vi.stubGlobal(
@@ -10,7 +10,7 @@ describe('App health check', () => {
       vi.fn(() => new Promise(() => {})),
     )
 
-    const wrapper = mount(App)
+    const wrapper = mount(HomeView)
 
     expect(wrapper.text()).toContain('Checking the API')
   })
