@@ -2,7 +2,7 @@
 
 A small, full-stack task manager: an **ASP.NET Core** Web API + a **Vue 3** SPA, with **SQLite** persistence and minimal **JWT** authentication with per-user task ownership. Built as a take-home assessment.
 
-> **Status: 🚧 in active development.** This README documents the target design and is kept in sync with the code as features land. The **Implementation status** checklist below is the source of truth for what actually works today — nothing here is claimed as complete until it is checked off and verified end-to-end.
+> **Status: ✅ complete.** Every feature below is implemented and verified end-to-end (UI → API → DB → UI), with `dotnet test` and the SPA build green. The **Implementation status** checklist is the source of truth: nothing is listed as complete that is not, and nothing real is left out.
 
 ## Implementation status
 
@@ -33,7 +33,20 @@ A small, full-stack task manager: an **ASP.NET Core** Web API + a **Vue 3** SPA,
 - [x] `JwtBearer` configured (issuer/audience/expiry validated; signing key from config)
 - [x] **Ownership enforced** (#18): `[Authorize]` on every task endpoint (missing/invalid token → `401`), `UserId` stamped from the token's `sub` claim, every query scoped to the caller, and cross-user access → `404` (existence never leaked)
 
-**Later phases** — frontend CRUD + auth flows → focused tests → final verification.
+**Phase 5 — Backend tests** (complete)
+- [x] Integration tests (xUnit + `WebApplicationFactory`) on the two highest-risk areas, with real assertions:
+  - **Ownership** — User A cannot read/update/delete User B's task (each returns `404`), a user's list contains only their own tasks, and a missing/forged token is rejected with `401`
+  - **Validation** — empty/whitespace title, missing due date, over-length title/description, duplicate email, and wrong password all return the correct status codes
+
+**Phase 6 — Frontend** (complete)
+- [x] Vue 3 + TypeScript SPA: design tokens + app shell, a Pinia auth store, and Vue Router with route guards
+- [x] Register / login flows with client-side validation, visible field + server errors, input preserved on failure, and submit disabled while in-flight; the HTTP layer attaches the `Bearer` token and bounces a `401` back to login
+- [x] Task list with distinct loading / empty / error (retry) states; **create, edit, complete/reopen, and delete** each close the loop — validate → call the API → update the list immediately (no refresh) — with visible error states on failure
+- [x] Clear visual distinction for **completed** and **overdue** tasks; due dates rendered as timezone-safe calendar dates
+
+**Phase 7 — Finalize** (complete)
+- [x] This README, kept honest and in sync with the code
+- [x] Final verification pass (#24): followed the setup steps end-to-end, traced every feature full-circle including error cases, confirmed cross-user isolation against the running API, checked the repo for stray files, and ran `dotnet test` (backend) + `npm run test:unit` (frontend) green
 
 ## Overview
 
@@ -94,9 +107,17 @@ npm run dev        # http://localhost:5173
 > The SPA reads the API base URL from `VITE_API_BASE_URL` (see [`frontend/.env.example`](frontend/.env.example)); it defaults to `http://localhost:5270`. The API allows the SPA dev origin `http://localhost:5173` via a configurable CORS policy (`Cors:AllowedOrigins`).
 
 ### Tests
+
+**Backend** — the focused xUnit integration tests (ownership + validation):
 ```bash
 cd backend
 dotnet test
+```
+
+**Frontend** — Vitest unit/component tests (needs Node 22; run `nvm use` in `frontend/` first):
+```bash
+cd frontend
+npm run test:unit
 ```
 
 ### Exploring the API
@@ -178,7 +199,7 @@ This is a small app, and the architecture is deliberately matched to that size. 
 
 Minimal JWT flow: `register` creates an account (password hashed with `PasswordHasher<User>`), `login` returns a short-lived access token, and the SPA sends it as a `Bearer` token on every request. Every task is associated with its owner via `UserId`, every query is scoped to the authenticated user, and ownership is enforced on list/get/update/delete: a task owned by someone else is indistinguishable from one that doesn't exist (`404`, never `403`).
 
-To try it: `POST /api/auth/register` with `{ "email", "password" }`, then `POST /api/auth/login` with the same credentials to get `{ "accessToken" }`, and send `Authorization: Bearer <token>` on the `/api/tasks` endpoints (the [`ToDoApi.http`](backend/ToDoApi/ToDoApi.http) file and Scalar's "Authorize" box both wire this up for you). Automated cross-user ownership tests arrive in Phase 5 (#19).
+To try it: `POST /api/auth/register` with `{ "email", "password" }`, then `POST /api/auth/login` with the same credentials to get `{ "accessToken" }`, and send `Authorization: Bearer <token>` on the `/api/tasks` endpoints (the [`ToDoApi.http`](backend/ToDoApi/ToDoApi.http) file and Scalar's "Authorize" box both wire this up for you). Cross-user ownership is covered by automated integration tests ([`TaskOwnershipTests.cs`](backend/ToDoApi.Tests/TaskOwnershipTests.cs)).
 
 ## Testing
 
