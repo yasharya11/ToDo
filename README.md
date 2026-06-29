@@ -1,6 +1,6 @@
 # ToDo — Task Management App
 
-A small, full-stack task manager: an **ASP.NET Core** Web API + a **Vue 3** SPA, with **SQLite** persistence and minimal **JWT** authentication with per-user task ownership. Built as a take-home assessment.
+A small, full-stack task manager: an **ASP.NET Core** Web API + a **Vue 3** SPA, with **SQLite** persistence and minimal **JWT** authentication with per-user task ownership.
 
 > **Status: ✅ complete.** Every feature below is implemented and verified end-to-end (UI → API → DB → UI), with `dotnet test` and the SPA build green. The **Implementation status** checklist is the source of truth: nothing is listed as complete that is not, and nothing real is left out.
 
