@@ -34,20 +34,20 @@ Content-Type: application/json
 
 @token = {{login.response.body.accessToken}}
 
-### Authenticated request shape (the task endpoints don't require the token until issue #18;
-### this shows how the SPA will send it once [Authorize] lands).
+### 401 — task endpoints now require a bearer token; without one the API returns Unauthorized
+GET {{ToDoApi_HostAddress}}/api/tasks
+Accept: application/json
+
+### List the signed-in user's tasks (empty on a fresh account)
 GET {{ToDoApi_HostAddress}}/api/tasks
 Accept: application/json
 Authorization: Bearer {{token}}
-
-### List all tasks (newest run starts empty on a fresh DB)
-GET {{ToDoApi_HostAddress}}/api/tasks
-Accept: application/json
 
 ### Create a task — capture the response so later requests can reuse its id
 # @name createTask
 POST {{ToDoApi_HostAddress}}/api/tasks
 Content-Type: application/json
+Authorization: Bearer {{token}}
 
 {
   "title": "Write the take-home README",
@@ -58,10 +58,12 @@ Content-Type: application/json
 ### Get the task just created (id pulled from the create response)
 GET {{ToDoApi_HostAddress}}/api/tasks/{{createTask.response.body.id}}
 Accept: application/json
+Authorization: Bearer {{token}}
 
 ### Update the task and mark it complete (PUT also toggles completion)
 PUT {{ToDoApi_HostAddress}}/api/tasks/{{createTask.response.body.id}}
 Content-Type: application/json
+Authorization: Bearer {{token}}
 
 {
   "title": "Write the take-home README",
@@ -72,14 +74,17 @@ Content-Type: application/json
 
 ### Delete the task
 DELETE {{ToDoApi_HostAddress}}/api/tasks/{{createTask.response.body.id}}
+Authorization: Bearer {{token}}
 
-### 404 — a task that does not exist returns ProblemDetails
+### 404 — a task you don't own (or one that doesn't exist) returns ProblemDetails, never 403
 GET {{ToDoApi_HostAddress}}/api/tasks/999999
 Accept: application/json
+Authorization: Bearer {{token}}
 
 ### 400 — validation: blank title and missing due date return ProblemDetails
 POST {{ToDoApi_HostAddress}}/api/tasks
 Content-Type: application/json
+Authorization: Bearer {{token}}
 
 {
   "title": "   ",

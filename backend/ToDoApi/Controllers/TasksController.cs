@@ -1,4 +1,8 @@
+using System.Globalization;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.JsonWebTokens;
 using ToDoApi.Dtos;
 using ToDoApi.Services;
 
@@ -8,8 +12,11 @@ namespace ToDoApi.Controllers;
 /// CRUD endpoints for the signed-in user's tasks. The controller stays thin: it maps HTTP
 /// to <see cref="TaskService"/> calls and chooses status codes. Model validation (400) is
 /// handled automatically by [ApiController]; "not found" is returned as ProblemDetails.
+/// Every endpoint requires a valid bearer token ([Authorize]); a missing or invalid token
+/// is rejected with 401 before any action runs.
 /// </summary>
 [ApiController]
+[Authorize]
 [Route("api/tasks")]
 [Produces("application/json")]
 public class TasksController : ControllerBase
@@ -22,12 +29,13 @@ public class TasksController : ControllerBase
     }
 
     /// <summary>
-    /// The owner every request is scoped to. Phase 3 has no auth yet, so this is the fixed
-    /// seeded dev user (see AppDbContext). This is the single seam Phase 4 replaces with the
-    /// authenticated user's id from the JWT — every action below already routes ownership
-    /// through it, so nothing else in this controller changes when real auth lands.
+    /// The owner every request is scoped to: the authenticated user's id, read from the JWT
+    /// <c>sub</c> claim (stamped by <c>TokenService</c>). [Authorize] guarantees an
+    /// authenticated principal here, and the app issues the token itself, so the claim is
+    /// always present and numeric. Every action below routes ownership through this id.
     /// </summary>
-    private const int CurrentUserId = 1;
+    private int CurrentUserId =>
+        int.Parse(User.FindFirstValue(JwtRegisteredClaimNames.Sub)!, CultureInfo.InvariantCulture);
 
     /// <summary>Lists the current user's tasks.</summary>
     [HttpGet]

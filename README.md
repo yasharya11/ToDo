@@ -25,15 +25,15 @@ A small, full-stack task manager: an **ASP.NET Core** Web API + a **Vue 3** SPA,
 - [x] Thin async `TaskService` over `DbContext` (async EF Core + `CancellationToken` throughout)
 - [x] DTO validation → `400` and missing task → `404`, both as `ProblemDetails`
 - [x] Verified: each verb persists to SQLite and returns the correct status code
-- [ ] **Not yet auth-scoped.** Tasks are owned by a single seeded dev user; real per-user ownership (and the `Bearer` requirement) arrives in Phase 4. Until then the endpoints are open.
+- [x] **Auth-scoped as of Phase 4 (#18).** The task endpoints now require a `Bearer` token and are owned by the authenticated user; the Phase 3 seed dev user has been removed.
 
-**Phase 4 — Auth + ownership** (in progress)
+**Phase 4 — Auth + ownership** (complete)
 - [x] `POST /api/auth/register` — `PasswordHasher<User>` (PBKDF2), duplicate email → `409`, email + password-length validation → `400`
 - [x] `POST /api/auth/login` — verifies the hash and returns a JWT access token; bad credentials → generic `401`
 - [x] `JwtBearer` configured (issuer/audience/expiry validated; signing key from config)
-- [ ] **Ownership not yet enforced** (issue #18): the task endpoints are still open and use the seeded dev user. `[Authorize]` + per-user scoping land next; until then a token isn't required to call `/api/tasks`.
+- [x] **Ownership enforced** (#18): `[Authorize]` on every task endpoint (missing/invalid token → `401`), `UserId` stamped from the token's `sub` claim, every query scoped to the caller, and cross-user access → `404` (existence never leaked)
 
-**Later phases** — per-user ownership on tasks → frontend CRUD + auth flows → focused tests → final verification.
+**Later phases** — frontend CRUD + auth flows → focused tests → final verification.
 
 ## Overview
 
@@ -176,7 +176,9 @@ This is a small app, and the architecture is deliberately matched to that size. 
 
 ## Authentication & ownership
 
-Minimal JWT flow: `register` creates an account (password hashed with `PasswordHasher<User>`), `login` returns a short-lived access token, and the SPA sends it as a `Bearer` token on every request. Every task is associated with its owner via `UserId`, every query is scoped to the authenticated user, and ownership is enforced on list/get/update/delete — verified by automated cross-user tests. *Once auth lands, this section will document how a reviewer can register a test account.*
+Minimal JWT flow: `register` creates an account (password hashed with `PasswordHasher<User>`), `login` returns a short-lived access token, and the SPA sends it as a `Bearer` token on every request. Every task is associated with its owner via `UserId`, every query is scoped to the authenticated user, and ownership is enforced on list/get/update/delete: a task owned by someone else is indistinguishable from one that doesn't exist (`404`, never `403`).
+
+To try it: `POST /api/auth/register` with `{ "email", "password" }`, then `POST /api/auth/login` with the same credentials to get `{ "accessToken" }`, and send `Authorization: Bearer <token>` on the `/api/tasks` endpoints (the [`ToDoApi.http`](backend/ToDoApi/ToDoApi.http) file and Scalar's "Authorize" box both wire this up for you). Automated cross-user ownership tests arrive in Phase 5 (#19).
 
 ## Testing
 

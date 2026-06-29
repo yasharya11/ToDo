@@ -78,10 +78,9 @@ public class AuthService
         }
 
         // VerifyHashedPassword returns Success, SuccessRehashNeeded, or Failed; only Failed is a
-        // wrong password. A stored value that isn't a real PBKDF2 hash (the seed dev user's
-        // "SEED-NO-LOGIN" placeholder, or any corrupt row) makes it throw FormatException while
-        // base64-decoding — treat that as a failed login, not a 500, so such accounts simply
-        // can't be logged into.
+        // wrong password. A stored value that isn't a real PBKDF2 hash (a corrupt or hand-edited
+        // row) makes it throw FormatException while base64-decoding — treat that as a failed
+        // login, not a 500, so such an account simply can't be logged into.
         PasswordVerificationResult verification;
         try
         {
