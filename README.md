@@ -8,7 +8,7 @@ A small, full-stack task manager: an **ASP.NET Core** Web API + a **Vue 3** SPA,
 
 **Phase 1 — Skeleton** (in progress)
 - [x] Solution + ASP.NET Core Web API project (`net10.0`)
-- [ ] xUnit integration-test project
+- [x] xUnit integration-test project
 - [ ] Vue 3 + TypeScript frontend
 - [ ] Dev CORS + configurable API base URL
 - [ ] End-to-end smoke test (frontend ↔ backend)
@@ -116,6 +116,9 @@ This is a small app, and the architecture is deliberately matched to that size. 
 | `PasswordHash` | string | PBKDF2 via `PasswordHasher` |
 
 ## API
+
+**Health**
+- `GET /api/health` → `{ "status": "ok" }` (liveness check; also exercised by the integration test)
 
 **Auth**
 - `POST /api/auth/register`
