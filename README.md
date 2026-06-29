@@ -14,7 +14,13 @@ A small, full-stack task manager: an **ASP.NET Core** Web API + a **Vue 3** SPA,
 - [x] End-to-end smoke test (frontend ↔ backend)
 - [x] `.gitignore` / repo hygiene
 
-**Later phases** — persistence (Task entity + EF Core + migrations) → backend CRUD + validation → frontend CRUD flows → minimal JWT auth + ownership → focused tests → final verification.
+**Phase 2 — Persistence** (complete)
+- [x] `User` + `TaskItem` entities (matches the data model below)
+- [x] `AppDbContext` + EF Core SQLite (file-based), registered in DI
+- [x] Initial migration, applied automatically on startup
+- [x] Verified: DB is created on first run and data survives an API restart
+
+**Later phases** — backend CRUD + validation → frontend CRUD flows → minimal JWT auth + ownership → focused tests → final verification.
 
 ## Overview
 
