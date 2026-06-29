@@ -15,11 +15,18 @@ namespace ToDoApi.Dtos;
 /// </remarks>
 public class CreateTaskRequest
 {
-    // RequiredAttribute trims before checking, so "" and "   " are both rejected.
-    // StringLength caps the raw length; the stored value is trimmed during mapping.
+    private string? _title;
+
+    // Title is trimmed as it binds, so validation and storage both see the trimmed value:
+    // a title padded with whitespace that fits within 200 chars after trimming is accepted,
+    // and "   " collapses to "" so [Required] (AllowEmptyStrings = false) still rejects it.
     [Required(AllowEmptyStrings = false, ErrorMessage = "Title is required.")]
     [StringLength(200, ErrorMessage = "Title must be 200 characters or fewer.")]
-    public string? Title { get; set; }
+    public string? Title
+    {
+        get => _title;
+        set => _title = value?.Trim();
+    }
 
     [StringLength(2000, ErrorMessage = "Description must be 2000 characters or fewer.")]
     public string? Description { get; set; }

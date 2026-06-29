@@ -66,6 +66,16 @@ public class TaskDtoValidationTests
     }
 
     [Fact]
+    public void Title_is_trimmed_on_bind_so_whitespace_padding_within_200_is_allowed()
+    {
+        CreateTaskRequest dto = ValidCreate();
+        dto.Title = "  " + new string('a', 200) + "  "; // 204 raw chars, 200 after trimming
+
+        Assert.False(FailedFor(Validate(dto), nameof(CreateTaskRequest.Title)));
+        Assert.Equal(200, dto.Title!.Length); // the setter stored the trimmed value
+    }
+
+    [Fact]
     public void Missing_due_date_is_rejected()
     {
         CreateTaskRequest dto = ValidCreate();

@@ -10,25 +10,26 @@ namespace ToDoApi.Dtos;
 public static class TaskMapping
 {
     /// <summary>
-    /// Builds a new entity from a create request. Title is trimmed and the task starts
-    /// incomplete. Owner id and the Created/Updated timestamps are the endpoint's
-    /// responsibility (they are not user input), so they are not set here.
+    /// Builds a new entity from a create request. The title arrives already trimmed from the
+    /// request DTO; the task starts incomplete. Owner id and the Created/Updated timestamps are
+    /// the endpoint's responsibility (they are not user input), so they are not set here.
     /// </summary>
     public static TaskItem ToEntity(this CreateTaskRequest request) => new()
     {
-        Title = request.Title!.Trim(),
+        Title = request.Title!,
         Description = request.Description,
         DueDate = request.DueDate!.Value,
         IsCompleted = false,
     };
 
     /// <summary>
-    /// Copies an update request onto an existing tracked entity (title trimmed). The
-    /// caller refreshes UpdatedAtUtc; UserId and CreatedAtUtc are never reassigned.
+    /// Copies an update request onto an existing tracked entity (the title is already trimmed at
+    /// the DTO boundary). The caller refreshes UpdatedAtUtc; UserId and CreatedAtUtc are never
+    /// reassigned.
     /// </summary>
     public static void ApplyTo(this UpdateTaskRequest request, TaskItem task)
     {
-        task.Title = request.Title!.Trim();
+        task.Title = request.Title!;
         task.Description = request.Description;
         task.DueDate = request.DueDate!.Value;
         task.IsCompleted = request.IsCompleted;
