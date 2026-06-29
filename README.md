@@ -20,7 +20,14 @@ A small, full-stack task manager: an **ASP.NET Core** Web API + a **Vue 3** SPA,
 - [x] Initial migration, applied automatically on startup
 - [x] Verified: DB is created on first run and data survives an API restart
 
-**Later phases** — backend CRUD + validation → frontend CRUD flows → minimal JWT auth + ownership → focused tests → final verification.
+**Phase 3 — Backend CRUD + validation** (complete)
+- [x] `TasksController` with `GET /api/tasks`, `GET /api/tasks/{id}`, `POST`, `PUT /{id}` (also toggles completion), `DELETE /{id}`
+- [x] Thin async `TaskService` over `DbContext` (async EF Core + `CancellationToken` throughout)
+- [x] DTO validation → `400` and missing task → `404`, both as `ProblemDetails`
+- [x] Verified: each verb persists to SQLite and returns the correct status code
+- [ ] **Not yet auth-scoped.** Tasks are owned by a single seeded dev user; real per-user ownership (and the `Bearer` requirement) arrives in Phase 4. Until then the endpoints are open.
+
+**Later phases** — frontend CRUD flows → minimal JWT auth + ownership → focused tests → final verification.
 
 ## Overview
 
