@@ -14,8 +14,8 @@ namespace ToDoApi.Services;
 /// <remarks>
 /// Every method takes the owner's <c>userId</c> and scopes its query to it, so a task that
 /// belongs to another user is invisible here (read/update/delete all return "not found").
-/// In Phase 3 the controller passes a single seeded dev user; Phase 4 passes the
-/// authenticated user's id and the same scoping becomes real ownership enforcement.
+/// The controller passes the authenticated user's id (from the JWT <c>sub</c> claim), so this
+/// scoping is the app's per-user ownership enforcement.
 /// </remarks>
 public class TaskService
 {
