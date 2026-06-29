@@ -6,12 +6,12 @@ A small, full-stack task manager: an **ASP.NET Core** Web API + a **Vue 3** SPA,
 
 ## Implementation status
 
-**Phase 1 — Skeleton** (in progress)
+**Phase 1 — Skeleton** (complete)
 - [x] Solution + ASP.NET Core Web API project (`net10.0`)
 - [x] xUnit integration-test project
 - [x] Vue 3 + TypeScript frontend
 - [x] Dev CORS + configurable API base URL
-- [ ] End-to-end smoke test (frontend ↔ backend)
+- [x] End-to-end smoke test (frontend ↔ backend)
 - [x] `.gitignore` / repo hygiene
 
 **Later phases** — persistence (Task entity + EF Core + migrations) → backend CRUD + validation → frontend CRUD flows → minimal JWT auth + ownership → focused tests → final verification.
