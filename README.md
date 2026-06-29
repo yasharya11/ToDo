@@ -106,6 +106,16 @@ npm run dev        # http://localhost:5173
 
 > The SPA reads the API base URL from `VITE_API_BASE_URL` (see [`frontend/.env.example`](frontend/.env.example)); it defaults to `http://localhost:5270`. The API allows the SPA dev origin `http://localhost:5173` via a configurable CORS policy (`Cors:AllowedOrigins`).
 
+### First run — create an account
+
+The app requires you to be signed in, and there are **no seed or demo credentials** — every account is self-registered (the dev seed user was intentionally removed, so a fresh database starts empty). To get in:
+
+1. With the API and SPA both running, open **http://localhost:5173**. You'll be redirected to the login page.
+2. Click **Create one** and register with any email and a password of **8 or more characters** — for example `reviewer@example.com` / `password123`. (The email only needs to look valid; nothing is sent to it.)
+3. Registering logs you straight in and lands you on your (empty) task list. Add a task to get started.
+
+Your account and tasks are stored in a local SQLite file (`backend/ToDoApi/todo.db`), so they **persist across API restarts**. To see per-user isolation for yourself, register a second account (e.g. in a private/incognito window): it gets its own separate list and can never see the first account's tasks.
+
 ### Tests
 
 **Backend** — the focused xUnit integration tests (ownership + validation):
@@ -117,8 +127,9 @@ dotnet test
 **Frontend** — Vitest unit/component tests (needs Node 22; run `nvm use` in `frontend/` first):
 ```bash
 cd frontend
-npm run test:unit
+npm run test:unit -- run   # one pass and exit (equivalently: npx vitest run)
 ```
+> Plain `npm run test:unit` runs Vitest in **watch mode** (re-runs on file changes); add `-- run` for a single pass in CI or a quick check.
 
 ### Exploring the API
 
