@@ -40,7 +40,20 @@ The app lets a user register, log in, and manage a personal to-do list. A task h
 
 **Prerequisites:** .NET 10 SDK and Node 22 (the frontend pins Node 22 via `frontend/.nvmrc`).
 
-The backend and frontend are independent apps — you run each with its own tool, from its own folder.
+You can run **both with one command** (optional, below), or each app **separately** (the Backend / Frontend sections).
+
+### Run both with one command (optional)
+From the repo root, with Node 22 active:
+```bash
+nvm use            # reads .nvmrc → Node 22
+npm install        # first run only — installs concurrently
+npm run dev        # API + SPA together; Ctrl+C stops both
+```
+The API serves at **http://localhost:5270** (Scalar at `/scalar`) and the SPA at **http://localhost:5173**.
+
+- Requires **Node 20+** (`concurrently`); Node 22 is needed for the SPA regardless.
+- Uses the API's **http** profile (5270) — don't also run the API in Visual Studio (F5) at the same time; they'd collide on 5270.
+- Stop with **Ctrl+C** (not by closing the terminal window) so the .NET process exits cleanly.
 
 ### Backend (API)
 **Visual Studio 2026:** open `backend/ToDo.slnx` and press **F5** (the `https` profile). The API runs at **https://localhost:7168**, with the Scalar API explorer at **https://localhost:7168/scalar**.
