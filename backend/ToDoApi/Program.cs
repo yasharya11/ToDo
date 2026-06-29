@@ -1,6 +1,12 @@
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
+using ToDoApi.Auth;
 using ToDoApi.Data;
+using ToDoApi.Models;
 using ToDoApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,6 +27,49 @@ builder.Services.AddScoped<TaskService>();
 string connectionString =
     builder.Configuration.GetConnectionString("Default") ?? "Data Source=todo.db";
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(connectionString));
+
+// --- Authentication: minimal JWT (PasswordHasher + JwtBearer), see README. ---
+// Bind JWT settings up front so they configure both token issuance (TokenService) and
+// validation (JwtBearer) from one source. The dev signing key lives in appsettings.json so a
+// fresh clone runs with no setup; production overrides it via env/secret.
+JwtOptions jwtOptions =
+    builder.Configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>()
+    ?? throw new InvalidOperationException("Missing 'Jwt' configuration section.");
+if (Encoding.UTF8.GetByteCount(jwtOptions.SigningKey) < 32)
+{
+    // HS256 requires a key of at least 256 bits; fail fast with a clear message rather than
+    // emitting tokens signed with a weak key.
+    throw new InvalidOperationException(
+        "Jwt:SigningKey must be at least 32 bytes (256 bits) for HS256. " +
+        "Set a strong key in configuration (override the dev key in production).");
+}
+
+builder.Services.AddSingleton(jwtOptions);
+builder.Services.AddSingleton<TokenService>();
+// PasswordHasher<User> is stateless, so a singleton is fine. AuthService uses the scoped
+// DbContext, so it is scoped.
+builder.Services.AddSingleton<IPasswordHasher<User>, PasswordHasher<User>>();
+builder.Services.AddScoped<AuthService>();
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        // Keep the 'sub' claim as 'sub' (no legacy mapping to ClaimTypes.NameIdentifier) so the
+        // user id reads back cleanly when ownership is enforced in issue #18.
+        options.MapInboundClaims = false;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = jwtOptions.Issuer,
+            ValidateAudience = true,
+            ValidAudience = jwtOptions.Audience,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SigningKey)),
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.FromSeconds(30),
+        };
+    });
+builder.Services.AddAuthorization();
 
 // CORS for the SPA. Allowed origins are configurable (Cors:AllowedOrigins) and
 // default to the Vite dev server, so a fresh clone works without extra config.
@@ -61,6 +110,7 @@ else
 
 app.UseCors(SpaCorsPolicy);
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
