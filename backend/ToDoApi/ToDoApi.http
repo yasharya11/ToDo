@@ -4,6 +4,42 @@
 GET {{ToDoApi_HostAddress}}/api/health
 Accept: application/json
 
+### Register a new account (201; duplicate email -> 409, bad email/short password -> 400)
+POST {{ToDoApi_HostAddress}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "alice@example.com",
+  "password": "correct horse"
+}
+
+### Log in -> { accessToken }. Captured below so later requests can send it as a bearer token.
+# @name login
+POST {{ToDoApi_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "alice@example.com",
+  "password": "correct horse"
+}
+
+### Wrong credentials -> 401 with a generic message (same for unknown email or bad password)
+POST {{ToDoApi_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "alice@example.com",
+  "password": "wrong password"
+}
+
+@token = {{login.response.body.accessToken}}
+
+### Authenticated request shape (the task endpoints don't require the token until issue #18;
+### this shows how the SPA will send it once [Authorize] lands).
+GET {{ToDoApi_HostAddress}}/api/tasks
+Accept: application/json
+Authorization: Bearer {{token}}
+
 ### List all tasks (newest run starts empty on a fresh DB)
 GET {{ToDoApi_HostAddress}}/api/tasks
 Accept: application/json

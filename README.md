@@ -27,7 +27,13 @@ A small, full-stack task manager: an **ASP.NET Core** Web API + a **Vue 3** SPA,
 - [x] Verified: each verb persists to SQLite and returns the correct status code
 - [ ] **Not yet auth-scoped.** Tasks are owned by a single seeded dev user; real per-user ownership (and the `Bearer` requirement) arrives in Phase 4. Until then the endpoints are open.
 
-**Later phases** — frontend CRUD flows → minimal JWT auth + ownership → focused tests → final verification.
+**Phase 4 — Auth + ownership** (in progress)
+- [x] `POST /api/auth/register` — `PasswordHasher<User>` (PBKDF2), duplicate email → `409`, email + password-length validation → `400`
+- [x] `POST /api/auth/login` — verifies the hash and returns a JWT access token; bad credentials → generic `401`
+- [x] `JwtBearer` configured (issuer/audience/expiry validated; signing key from config)
+- [ ] **Ownership not yet enforced** (issue #18): the task endpoints are still open and use the seeded dev user. `[Authorize]` + per-user scoping land next; until then a token isn't required to call `/api/tasks`.
+
+**Later phases** — per-user ownership on tasks → frontend CRUD + auth flows → focused tests → final verification.
 
 ## Overview
 
@@ -118,7 +124,7 @@ This is a small app, and the architecture is deliberately matched to that size. 
 - **Frontend and backend are independent apps, not one bundled project.** The Vue SPA (Vite/npm) and the ASP.NET Core API (MSBuild) have separate toolchains and communicate only over an HTTP/JSON contract — with a dev CORS policy and a configurable API base URL. The SPA is just one consumer of the API, so the boundary stays clean, versionable, and independently deployable. The frontend is kept a plain npm project (no IDE-specific project file) so it clones and runs on any editor or OS.
 - **SQLite (file), not in-memory.** Data must survive an API restart, so the app uses a file-based SQLite database. EF Core **migrations** define the schema and are applied automatically on startup, so the app runs on a fresh clone with no manual database steps.
 - **Instants vs. calendar dates are modeled differently.** `CreatedAtUtc` / `UpdatedAtUtc` are *instants* → `DateTimeOffset` stored in UTC. A task's **due date is a *calendar date*** (not a moment in time) → modeled as `DateOnly`, so "June 30" stays June 30 in every timezone (no off-by-one when the client renders it).
-- **Minimal JWT auth, not full ASP.NET Core Identity.** The app uses the framework's vetted primitives — `Microsoft.AspNetCore.Authentication.JwtBearer` to validate tokens and `PasswordHasher<User>` (PBKDF2) to hash passwords — without Identity's `UserManager`/`SignInManager` scaffolding or refresh-token machinery, which this exercise doesn't need. Register/login issue a short-lived access token.
+- **Minimal JWT auth, not full ASP.NET Core Identity.** The app uses the framework's vetted primitives — `Microsoft.AspNetCore.Authentication.JwtBearer` to validate tokens and `PasswordHasher<User>` (PBKDF2) to hash passwords — without Identity's `UserManager`/`SignInManager` scaffolding or refresh-token machinery, which this exercise doesn't need. Register/login issue a short-lived access token. The signing key, issuer, and audience come from the `Jwt` configuration section; a **development** key ships in `appsettings.json` so a fresh clone runs with no setup, and a real deployment overrides it (`Jwt:SigningKey`) via an environment variable or secret store.
 - **Ownership enforced by construction.** Every task carries a `UserId`; every query is scoped to the authenticated user's id. There is no code path that returns another user's task, and cross-user access returns **404** (not 403) so the API doesn't reveal that the row exists.
 - **DTOs at the boundary, `ProblemDetails` for errors.** Requests/responses use DTOs rather than exposing EF entities directly, and failures use the standard `ProblemDetails` format.
 
@@ -142,8 +148,8 @@ This is a small app, and the architecture is deliberately matched to that size. 
 | Field | Type | Notes |
 |---|---|---|
 | `Id` | int | PK |
-| `Email` | string | unique |
-| `PasswordHash` | string | PBKDF2 via `PasswordHasher` |
+| `Email` | string | unique, normalized lower-case, ≤ 254 chars (RFC 5321) |
+| `PasswordHash` | string | PBKDF2 via `PasswordHasher`, ≤ 256 chars |
 
 ## API
 

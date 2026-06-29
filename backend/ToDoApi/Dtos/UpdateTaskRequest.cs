@@ -9,9 +9,16 @@ namespace ToDoApi.Dtos;
 /// </summary>
 public class UpdateTaskRequest
 {
+    private string? _title;
+
+    // Trimmed on bind so length is validated against the stored value (see CreateTaskRequest.Title).
     [Required(AllowEmptyStrings = false, ErrorMessage = "Title is required.")]
     [StringLength(200, ErrorMessage = "Title must be 200 characters or fewer.")]
-    public string? Title { get; set; }
+    public string? Title
+    {
+        get => _title;
+        set => _title = value?.Trim();
+    }
 
     [StringLength(2000, ErrorMessage = "Description must be 2000 characters or fewer.")]
     public string? Description { get; set; }

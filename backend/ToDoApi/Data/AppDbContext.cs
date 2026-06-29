@@ -22,8 +22,13 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<User>(entity =>
         {
             entity.HasIndex(u => u.Email).IsUnique();
-            entity.Property(u => u.Email).IsRequired();
-            entity.Property(u => u.PasswordHash).IsRequired();
+            // 254 is the RFC 5321 maximum length of a deliverable email address. Email is the
+            // unique index key, so it must be bounded for a server RDBMS (a unique index can't
+            // cover an unbounded column); on SQLite the cap is documentation only.
+            entity.Property(u => u.Email).IsRequired().HasMaxLength(254);
+            // PasswordHasher's PBKDF2 (v3) output is a fixed 84 chars regardless of password
+            // length; 256 leaves headroom for a future hash format while staying bounded.
+            entity.Property(u => u.PasswordHash).IsRequired().HasMaxLength(256);
 
             // Phase 3 placeholder owner. Tasks carry a required UserId FK, but real
             // accounts don't exist until JWT auth lands in Phase 4. This seeds one
