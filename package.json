@@ -2,7 +2,7 @@
   "name": "todo",
   "version": "0.0.0",
   "private": true,
-  "description": "EXPERIMENT (issue #9): optional one-command dev startup for BOTH the API and the SPA. NOT part of the take-home submission scope. Normal workflow is VS F5 (or `dotnet run`) for the API + `cd frontend && npm run dev` for the SPA.",
+  "description": "Optional one-command dev runner: npm run dev starts the API + SPA together via concurrently. A convenience; the standard workflow (VS F5 or dotnet run for the API, cd frontend && npm run dev for the SPA) is documented in the README.",
   "scripts": {
     "dev": "concurrently -k -n api,web -c blue,green \"dotnet run --project backend/ToDoApi\" \"npm --prefix frontend run dev\""
   },
