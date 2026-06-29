@@ -9,8 +9,8 @@ A small, full-stack task manager: an **ASP.NET Core** Web API + a **Vue 3** SPA,
 **Phase 1 — Skeleton** (in progress)
 - [x] Solution + ASP.NET Core Web API project (`net10.0`)
 - [x] xUnit integration-test project
-- [ ] Vue 3 + TypeScript frontend
-- [ ] Dev CORS + configurable API base URL
+- [x] Vue 3 + TypeScript frontend
+- [x] Dev CORS + configurable API base URL
 - [ ] End-to-end smoke test (frontend ↔ backend)
 - [x] `.gitignore` / repo hygiene
 
@@ -59,7 +59,7 @@ npm install        # first run only
 npm run dev        # http://localhost:5173
 ```
 
-> The SPA's API base URL is set via `VITE_API_BASE_URL` (see `.env.example`).
+> The SPA reads the API base URL from `VITE_API_BASE_URL` (see [`frontend/.env.example`](frontend/.env.example)); it defaults to `http://localhost:5270`. The API allows the SPA dev origin `http://localhost:5173` via a configurable CORS policy (`Cors:AllowedOrigins`).
 
 ### Tests
 ```bash
