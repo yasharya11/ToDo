@@ -1,4 +1,6 @@
+using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
+using ToDoApi.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,6 +9,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+
+// EF Core + SQLite (file-based, so data survives an API restart). The connection
+// string is configurable; it defaults to a todo.db file in the app's working directory.
+string connectionString =
+    builder.Configuration.GetConnectionString("Default") ?? "Data Source=todo.db";
+builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(connectionString));
 
 // CORS for the SPA. Allowed origins are configurable (Cors:AllowedOrigins) and
 // default to the Vite dev server, so a fresh clone works without extra config.
@@ -23,6 +31,13 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+// Apply migrations on startup so a fresh clone runs with no manual database steps.
+using (IServiceScope scope = app.Services.CreateScope())
+{
+    AppDbContext db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
