@@ -1,0 +1,67 @@
+/*
+ * Design tokens — the single source of truth for the app's visual language.
+ * Transcribed verbatim from the Tasker UI kit's :root block so every component
+ * styles itself from these variables rather than hard-coded values.
+ */
+:root {
+  /* Surfaces & borders */
+  --c-bg: #f5f6f8;
+  --c-surface: #ffffff;
+  --c-surface-2: #eef1f4;
+  --c-border: #e4e8ec;
+  --c-border-strong: #ccd3da;
+
+  /* Text */
+  --c-text: #1b2228;
+  --c-text-muted: #5a646e;
+  --c-text-subtle: #8b949e;
+
+  /* Brand */
+  --c-primary: #0e7c86;
+  --c-primary-hover: #0b626b;
+  --c-primary-weak: #e3f3f4;
+
+  /* Status — foreground + tint background pairs */
+  --c-overdue: #b42318;
+  --c-overdue-bg: #fcebe9;
+  --c-due-today: #9a5a00;
+  --c-due-today-bg: #fbf2e0;
+  --c-completed: #1f7a4d;
+  --c-completed-bg: #e7f4ed;
+  --c-neutral: #5a646e;
+  --c-neutral-bg: #eceff2;
+  --c-danger: #b42318;
+  --c-danger-hover: #8f1c12;
+  --c-danger-bg: #fcebe9;
+
+  /* Spacing — 4px base scale */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+
+  /* Radius */
+  --r-sm: 6px;
+  --r-md: 8px;
+  --r-lg: 12px;
+  --r-pill: 999px;
+
+  /* Type scale */
+  --fs-xs: 12px;
+  --fs-sm: 13px;
+  --fs-base: 15px;
+  --fs-md: 17px;
+  --fs-lg: 20px;
+  --fs-xl: 26px;
+
+  /* Elevation */
+  --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.06), 0 1px 3px rgba(16, 24, 40, 0.05);
+  --shadow-md: 0 10px 30px rgba(16, 24, 40, 0.16), 0 2px 6px rgba(16, 24, 40, 0.08);
+
+  /* Fonts */
+  --font: 'Helvetica Neue', Helvetica, Arial, system-ui, sans-serif;
+  --font-mono: 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
+}

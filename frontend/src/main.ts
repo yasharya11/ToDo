@@ -1,3 +1,6 @@
+import './assets/styles/tokens.css'
+import './assets/styles/base.css'
+
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 
