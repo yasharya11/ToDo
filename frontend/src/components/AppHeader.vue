@@ -3,12 +3,13 @@
 // It is purely presentational — the brand sits on the left, and the right-hand
 // `actions` slot is where later tickets drop the user email + Log out (#21) and
 // the Create task button (#22/#23). The shell owns no auth or task state itself.
+import BrandLogo from '@/components/BrandLogo.vue'
 </script>
 
 <template>
   <header class="app-header">
     <div class="app-header__brand">
-      <span class="app-header__logo" aria-hidden="true">T</span>
+      <BrandLogo :size="30" />
       <span class="app-header__wordmark">Tasker</span>
     </div>
     <div class="app-header__actions">
@@ -34,19 +35,6 @@
   gap: var(--sp-3);
 }
 
-.app-header__logo {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 7px;
-  background: var(--c-primary);
-  color: #fff;
-  font-weight: 700;
-  font-size: var(--fs-base);
-}
-
 .app-header__wordmark {
   font-weight: 700;
   font-size: var(--fs-md);
@@ -63,11 +51,6 @@
 @media (max-width: 640px) {
   .app-header {
     padding: var(--sp-3) var(--sp-4);
-  }
-
-  .app-header__logo {
-    width: 28px;
-    height: 28px;
   }
 
   .app-header__wordmark {
