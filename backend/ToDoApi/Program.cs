@@ -23,4 +23,9 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+app.MapGet("/api/health", () => Results.Ok(new { status = "ok" }));
+
 app.Run();
+
+// Exposed so the test project can spin up the API via WebApplicationFactory<Program>.
+public partial class Program { }
