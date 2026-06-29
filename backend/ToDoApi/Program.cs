@@ -68,6 +68,22 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateLifetime = true,
             ClockSkew = TimeSpan.FromSeconds(30),
         };
+
+        // Defense-in-depth: every token this app issues carries a numeric 'sub'
+        // (TokenService); reject any validated token that lacks one so the ownership
+        // code that reads the user id can never fault on a malformed principal.
+        options.Events = new JwtBearerEvents
+        {
+            OnTokenValidated = context =>
+            {
+                string? sub = context.Principal?.FindFirst("sub")?.Value;
+                if (!int.TryParse(sub, out _))
+                {
+                    context.Fail("Token is missing a valid numeric subject.");
+                }
+                return Task.CompletedTask;
+            },
+        };
     });
 builder.Services.AddAuthorization();
 
