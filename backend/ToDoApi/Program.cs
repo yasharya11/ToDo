@@ -1,14 +1,20 @@
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using ToDoApi.Data;
+using ToDoApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllers();
+// Return failures (validation, 404, unhandled) in the standard ProblemDetails shape.
+builder.Services.AddProblemDetails();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+
+// Thin task data-access service over AppDbContext (scoped, matching the DbContext lifetime).
+builder.Services.AddScoped<TaskService>();
 
 // EF Core + SQLite (file-based, so data survives an API restart). The connection
 // string is configurable; it defaults to a todo.db file in the app's working directory.

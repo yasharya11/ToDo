@@ -24,6 +24,20 @@ public class AppDbContext : DbContext
             entity.HasIndex(u => u.Email).IsUnique();
             entity.Property(u => u.Email).IsRequired();
             entity.Property(u => u.PasswordHash).IsRequired();
+
+            // Phase 3 placeholder owner. Tasks carry a required UserId FK, but real
+            // accounts don't exist until JWT auth lands in Phase 4. This seeds one
+            // fixed dev user (Id 1) so CRUD has a valid owner to attach tasks to; the
+            // controller's CurrentUserId constant points here. The hash is deliberately
+            // not a real PBKDF2 hash, so this seed account cannot be logged into once
+            // auth exists. Phase 4 replaces the constant with the authenticated user's
+            // id and can drop this seed in a follow-up migration.
+            entity.HasData(new User
+            {
+                Id = 1,
+                Email = "dev@todo.local",
+                PasswordHash = "SEED-NO-LOGIN",
+            });
         });
 
         modelBuilder.Entity<TaskItem>(entity =>
