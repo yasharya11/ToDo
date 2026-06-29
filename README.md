@@ -33,29 +33,33 @@ The app lets a user register, log in, and manage a personal to-do list. A task h
 ## Prerequisites
 
 - **.NET SDK 10.0.x** — https://dotnet.microsoft.com/download
-- **Node.js 22** (LTS) — an `.nvmrc` is provided; run `nvm use` inside `frontend/`
+- **Node.js 22** (LTS) — `frontend/.nvmrc` pins it; run `nvm use` inside `frontend/`
 - The EF Core CLI is *optional*; migrations are applied automatically on API startup.
 
 ## Getting started
 
-> These commands reflect the planned Phase 1 structure; they become exact once the scaffolding tracked in the issues is committed.
+**Prerequisites:** .NET 10 SDK and Node 22 (the frontend pins Node 22 via `frontend/.nvmrc`).
 
-### Backend
+The backend and frontend are independent apps — you run each with its own tool, from its own folder.
+
+### Backend (API)
+**Visual Studio 2026:** open `backend/ToDo.slnx` and press **F5** (the `https` profile). The API runs at **https://localhost:7168**, with the Scalar API explorer at **https://localhost:7168/scalar**.
+
+**Or from the CLI** (no Visual Studio needed):
 ```bash
-cd backend/ToDoApi
-dotnet restore
-dotnet run
+dotnet run --project backend/ToDoApi
 ```
-The API prints its URL on startup; the OpenAPI / Scalar UI is served there.
+This uses the `http` profile at **http://localhost:5270**; Scalar is at **http://localhost:5270/scalar**.
 
-### Frontend
+### Frontend (SPA)
 ```bash
 cd frontend
-nvm use            # picks up Node 22 from .nvmrc
-npm install
-npm run dev        # serves at http://localhost:5173
+nvm use            # reads frontend/.nvmrc → Node 22
+npm install        # first run only
+npm run dev        # http://localhost:5173
 ```
-Set the API base URL via `VITE_API_BASE_URL` (see `.env.example`).
+
+> The SPA's API base URL is set via `VITE_API_BASE_URL` (see `.env.example`).
 
 ### Tests
 ```bash
