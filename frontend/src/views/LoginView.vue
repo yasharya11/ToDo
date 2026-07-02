@@ -77,7 +77,6 @@ async function onSubmit(): Promise<void> {
         v-model="email"
         label="Email"
         type="email"
-        placeholder="you@example.com"
         autocomplete="email"
         :error="emailError"
       />
@@ -86,7 +85,6 @@ async function onSubmit(): Promise<void> {
         v-model="password"
         label="Password"
         type="password"
-        placeholder="••••••••"
         autocomplete="current-password"
         :error="passwordError"
       />
